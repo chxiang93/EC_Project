@@ -8,16 +8,6 @@ using namespace std;
 
 const int GENE = 34;
 const int POP_SIZE = 30;
-//const string ATTRIBUTE[GENE] = { "radius(mean)", "texture(mean)", "perimeter(mean)", "area(mean)", "smoothness(mean)", "compactness(mean)", "cancavity(mean)", "concave points(mean)","symmetry(mean)","fractal dimension(mean)",    
-//                                 "radius(standard error)", "texture(standard error)", "perimeter(standard error)", "area(standard error)", "smoothness(standard error)", "compactness(standard error)", "cancavity(standard error)", 
-//                                 "concave points(standard error)","symmetry(standard error)","fractal dimension(standard error)", "radius(worst)", "texture(worst)", "perimeter(worst)", "area(worst)", "smoothness(worst)", 
-//                                "compactness(worst)", "cancavity(worst)", "concave points(worst)","symmetry(worst)","fractal dimension(worst)" };
-
-//const string ATTRIBUTE[GENE] = { "time", "radius(mean)", "texture(mean)", "perimeter(mean)", "area(mean)", "smoothness(mean)", "compactness(mean)", "cancavity(mean)", "concave points(mean)","symmetry(mean)","fractal dimension(mean)",
-//                                 "radius(standard error)", "texture(standard error)", "perimeter(standard error)", "area(standard error)", "smoothness(standard error)", "compactness(standard error)", "cancavity(standard error)",
-//                                 "concave points(standard error)","symmetry(standard error)","fractal dimension(standard error)", "radius(worst)", "texture(worst)", "perimeter(worst)", "area(worst)", "smoothness(worst)",
-//                                 "compactness(worst)", "cancavity(worst)", "concave points(worst)","symmetry(worst)","fractal dimension(worst)", "tumor size", "lymph node status" };
-
 const string ATTRIBUTE[GENE] = { "erythema", "scaling", "definite_borders","itching","koebner_phenomenon","polygonal_papules","follicular_papules","oral_mucosal_involvement","knee_and_elbow_involvement","scalp_involvement",
                                  "family_history","melanin_incontinence","eosinophils_in_the_infiltrate","PNL_infiltrate","fibrosis_of_the_papillary_dermis","exocytosis","acanthosis","hyperkeratosis","parakeratosis","clubbing_of_the_rete_ridges",
                                  "elongation_of_the_rete_ridges","thinning_of_the_suprapapillary_epidermis","spongiform_pustule","munro_microabcess","focal_hypergranulosis","disappearance_of_the_granular_layer","vacuolisation_and_damage_of_basal_layer","spongiosis","saw-tooth_appearance_of_rete","follicular_horn_plug",
@@ -77,30 +67,6 @@ void evaluateChromosome(const char* path)
             }
         }
     }
-    
-    /*wchar_t* program = Py_DecodeLocale(path, NULL);
-
-    if (program == NULL)
-    {
-        fprintf(stderr, "Fatal error: cannot decode argv[0]\n");
-        exit(1);
-    }
-
-    Py_SetProgramName(program);
-    Py_Initialize();
-
-    PyRun_SimpleString(
-        "import numpy as np\n"
-        "import pandas as pd\n"
-        "from sklearn.model_selection import train_test_split\n"
-        "from sklearn.neighbors import KNeighborsClassifier\n"
-        "from sklearn.ensemble import RandomForestClassifier\n"
-        "from sklearn.metrics import confusion_matrix\n"
-        "from sklearn.metrics import roc_curve\n"
-        "from sklearn.metrics import roc_auc_score\n"
-        "accuracyFile = open('accuracy_result.txt','w')\n"
-        "accuracyFile.close()\n"
-    );*/
 
     PyRun_SimpleString(
         "accuracyFile = open('accuracy_result.txt','w')\n"
@@ -110,23 +76,12 @@ void evaluateChromosome(const char* path)
     for (int i = 0; i < POP_SIZE; i++)
     {
         PyRun_SimpleString(
-            //"df = pd.read_csv('wdbc.csv')\n"
-            //"df = pd.read_csv('wpbc.csv')\n"
             "df = pd.read_csv('dermatology.csv')\n"
-            //"df.columns = ['ID number', 'Class', 'radius(mean)', 'texture(mean)', 'perimeter(mean)', 'area(mean)', 'smoothness(mean)', 'compactness(mean)', 'cancavity(mean)', 'concave points(mean)', 'symmetry(mean)', 'fractal dimension(mean)', \\"
-            //"\n'radius(standard error)', 'texture(standard error)', 'perimeter(standard error)', 'area(standard error)', 'smoothness(standard error)', 'compactness(standard error)', 'cancavity(standard error)', 'concave points(standard error)', 'symmetry(standard error)', 'fractal dimension(standard error)', \\"
-            //"\n'radius(worst)', 'texture(worst)', 'perimeter(worst)', 'area(worst)', 'smoothness(worst)', 'compactness(worst)', 'cancavity(worst)', 'concave points(worst)', 'symmetry(worst)', 'fractal dimension(worst)']\n"
-            
-            "df.columns = ['ID number', 'Class', 'time', 'radius(mean)', 'texture(mean)', 'perimeter(mean)', 'area(mean)', 'smoothness(mean)', 'compactness(mean)', 'cancavity(mean)', 'concave points(mean)', 'symmetry(mean)', 'fractal dimension(mean)', \\"
-            "\n'radius(standard error)', 'texture(standard error)', 'perimeter(standard error)', 'area(standard error)', 'smoothness(standard error)', 'compactness(standard error)', 'cancavity(standard error)', 'concave points(standard error)', 'symmetry(standard error)', 'fractal dimension(standard error)', \\"
-            "\n'radius(worst)', 'texture(worst)', 'perimeter(worst)', 'area(worst)', 'smoothness(worst)', 'compactness(worst)', 'cancavity(worst)', 'concave points(worst)', 'symmetry(worst)', 'fractal dimension(worst)', 'tumor size', 'lymph node status']\n"
-            
             "df.columns = ['erythema', 'scaling', 'definite_borders', 'itching', 'koebner_phenomenon', 'polygonal_papules', 'follicular_papules', 'oral_mucosal_involvement', 'knee_and_elbow_involvement', 'scalp_involvement', \\"
             "\n'family_history', 'melanin_incontinence', 'eosinophils_in_the_infiltrate', 'PNL_infiltrate', 'fibrosis_of_the_papillary_dermis', 'exocytosis', 'acanthosis', 'hyperkeratosis', 'parakeratosis', 'clubbing_of_the_rete_ridges', \\"
             "\n'elongation_of_the_rete_ridges', 'thinning_of_the_suprapapillary_epidermis', 'spongiform_pustule', 'munro_microabcess', 'focal_hypergranulosis', 'disappearance_of_the_granular_layer', 'vacuolisation_and_damage_of_basal_layer', 'spongiosis', 'saw-tooth_appearance_of_rete', 'follicular_horn_plug',   \\"
             "\n'perifollicular_parakeratosis', 'inflammatory_monoluclear_inflitrate', 'band-like_infiltrate', 'age','Class']\n"
             
-            //"df = df.drop(columns = 'ID number')\n"
             "df = df.replace('?', np.NaN)\n"
             "df = df.dropna()\n"
         );
@@ -156,21 +111,10 @@ void evaluateChromosome(const char* path)
             "knn = KNeighborsClassifier(n_neighbors = 10)\n"
             "knn.fit(X_train, y_train)\n"
             "accuracy = knn.score(X_test, y_test)\n"
-            //"model = RandomForestClassifier(n_estimators = 100, random_state = 0, n_jobs = -1)\n"
-            //"model.fit(X_train, y_train)\n"
-            //"y_pred = model.predict(X_test)\n"
-            //"accuracy = model.score(X_test, y_test)\n"
             "with open('accuracy_result.txt', 'a') as f :\n"
             "\tf.write(f'{accuracy}\\n')\n"
         );
     }
-
-    /*if (Py_FinalizeEx() < 0)
-    {
-        exit(120);
-    }
-
-    PyMem_RawFree(program);*/
 
     ifstream fitnessFile("accuracy_result.txt");
 
