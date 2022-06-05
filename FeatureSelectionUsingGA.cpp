@@ -12,25 +12,139 @@ const string ATTRIBUTE[GENE] = { "erythema", "scaling", "definite_borders","itch
                                  "family_history","melanin_incontinence","eosinophils_in_the_infiltrate","PNL_infiltrate","fibrosis_of_the_papillary_dermis","exocytosis","acanthosis","hyperkeratosis","parakeratosis","clubbing_of_the_rete_ridges",
                                  "elongation_of_the_rete_ridges","thinning_of_the_suprapapillary_epidermis","spongiform_pustule","munro_microabcess","focal_hypergranulosis","disappearance_of_the_granular_layer","vacuolisation_and_damage_of_basal_layer","spongiosis","saw-tooth_appearance_of_rete","follicular_horn_plug",
                                  "perifollicular_parakeratosis","inflammatory_monoluclear_inflitrate","band-like_infiltrate","age"};
-const double CROSSOVER_PROBABILITY = 0.9;
+const double CROSSOVER_PROBABILITY = 0.8;
 const double MUTATION_PROBABILITY = 0.2;
 const int MAXIMUM_GENERATION = 50;
 
-int chromosome[POP_SIZE][GENE];
-int sumChromosome[POP_SIZE];
-double fitnessValue[POP_SIZE];
-int parents[2][GENE];
-int children[2][GENE];
-int survivor[POP_SIZE][GENE];
-int counterSurvival{ 0 };
-double averageFitness = 0;
-double bestFitness = -1;
-int bestChromosome[GENE];
+//int chromosome[POP_SIZE][GENE];
+//int sumChromosome[POP_SIZE];
+//double fitnessValue[POP_SIZE];
+//int parents[2][GENE];
+//int children[2][GENE];
+//int survivor[POP_SIZE][GENE];
+//int counterSurvival{ 0 };
+//double averageFitness = 0;
+//double bestFitness = -1;
+//int bestChromosome[GENE];
 ofstream ACP_File("ACP_File.txt");
 ofstream BSF_File("BSF_File.txt");
 ofstream bestChromosome_File("bestChromosome_File.txt");
 
-void initialisePopulation()
+class GA
+{
+public:
+    GA(const char* path);
+    ~GA();
+    void printChromosome();
+    void initialisePopulation();
+    void evaluateChromosome();
+    void parentSelection();
+    void crossover();
+    void mutation();
+    void survivalSelection();
+    void copyChromosome();
+    void calculateAverageFitness();
+    void recordBestFitness();
+    int counterSurvival{ 0 };
+    
+private:
+    int chromosome[POP_SIZE][GENE];
+    int sumChromosome[POP_SIZE];
+    double fitnessValue[POP_SIZE];
+    int parents[2][GENE];
+    int children[2][GENE];
+    int survivor[POP_SIZE][GENE];
+    double averageFitness = 0;
+    double bestFitness = -1;
+    int bestChromosome[GENE];
+
+    wchar_t* program;
+    void initializePython(const char* path);
+    void closePython();
+};
+
+int main(int argc, char* argv[])
+{
+    const char* path = argv[0];
+
+    GA featureSelectionGA(path);
+   /* cout << "\nINITIALIZE POPULATION\n";
+    initialisePopulation();
+    printChromosome();
+
+    cout << "\nFITNESS EVALUATION\n";
+    evaluateChromosome(path);
+
+    cout << "\n\nPARENT SELECTION";
+    parentSelection();*/
+
+    cout << "\nINITIALIZE POPULATION\n";
+    featureSelectionGA.initialisePopulation();
+
+    for (int j = 0; j < MAXIMUM_GENERATION; j++)
+    {
+        cout << "\n***************************GENERATION " << j + 1 << "****************************";
+        cout << "\n\nNEW POPULATION\n";
+        featureSelectionGA.printChromosome();
+        //getchar();
+
+        featureSelectionGA.counterSurvival = 0;
+
+        cout << "\nFITNESS EVALUATION";
+        featureSelectionGA.evaluateChromosome();
+        featureSelectionGA.calculateAverageFitness();
+        featureSelectionGA.recordBestFitness();
+
+        for (int i = 0; i < POP_SIZE / 2; i++)
+        {
+            cout << "\n\nPARENT SELECTION";
+            featureSelectionGA.parentSelection();
+
+            cout << "\n\nCROSSOVER";
+            featureSelectionGA.crossover();
+
+            cout << "\n\nMUTATION";
+            featureSelectionGA.mutation();
+
+            cout << "\n\nSURVIVAL SELECTION";
+            featureSelectionGA.survivalSelection();
+        }
+
+        featureSelectionGA.copyChromosome();
+    }
+
+    cout << "\n\nNEW POPULATION\n";
+    featureSelectionGA.printChromosome();
+}
+
+GA::GA(const char* path)
+{
+    initializePython(path);
+}
+
+GA::~GA()
+{
+    closePython();
+    ACP_File.close();
+    BSF_File.close();
+    bestChromosome_File.close();
+}
+
+void GA::printChromosome()
+{
+    for (int c = 0; c < POP_SIZE; c++)
+    {
+        cout << "Chr " << c + 1 << "\t: ";
+
+        for (int g = 0; g < GENE; g++)
+        {
+            cout << chromosome[c][g] << ' ';
+        }
+        cout << '\n';
+    }
+}
+
+void GA::initialisePopulation()
 {
     srand(time(0));
 
@@ -38,7 +152,7 @@ void initialisePopulation()
     {
         int sum = 0;
 
-       do {
+       // do {
             sum = 0;
 
             for (int g = 0; g < GENE; g++)
@@ -48,13 +162,13 @@ void initialisePopulation()
             }
 
             sumChromosome[c] = sum;
-       } while (sum > 10);
+       // } while (sum > 10);
     }
 }
 
-void evaluateChromosome(const char* path)
+void GA::evaluateChromosome()
 {
-    vector<string> choosenAttribute(POP_SIZE);
+    string choosenAttribute[POP_SIZE];
 
     for (int c = 0; c < POP_SIZE; c++)
     {
@@ -72,7 +186,7 @@ void evaluateChromosome(const char* path)
         "accuracyFile = open('accuracy_result.txt','w')\n"
         "accuracyFile.close()\n"
     );
-    
+
     for (int i = 0; i < POP_SIZE; i++)
     {
         PyRun_SimpleString(
@@ -81,7 +195,7 @@ void evaluateChromosome(const char* path)
             "\n'family_history', 'melanin_incontinence', 'eosinophils_in_the_infiltrate', 'PNL_infiltrate', 'fibrosis_of_the_papillary_dermis', 'exocytosis', 'acanthosis', 'hyperkeratosis', 'parakeratosis', 'clubbing_of_the_rete_ridges', \\"
             "\n'elongation_of_the_rete_ridges', 'thinning_of_the_suprapapillary_epidermis', 'spongiform_pustule', 'munro_microabcess', 'focal_hypergranulosis', 'disappearance_of_the_granular_layer', 'vacuolisation_and_damage_of_basal_layer', 'spongiosis', 'saw-tooth_appearance_of_rete', 'follicular_horn_plug',   \\"
             "\n'perifollicular_parakeratosis', 'inflammatory_monoluclear_inflitrate', 'band-like_infiltrate', 'age','Class']\n"
-            
+
             "df = df.replace('?', np.NaN)\n"
             "df = df.dropna()\n"
         );
@@ -121,10 +235,11 @@ void evaluateChromosome(const char* path)
     for (int i = 0; fitnessFile; i++)
     {
         double accuracy;
+        //fitnessFile >> fitnessValue[i];
         fitnessFile >> accuracy;
 
         //fitnessValue[i] = (accuracy + (1 / (sumChromosome[i] + 0.01))) / 2.0;
-        fitnessValue[i] = accuracy * ((GENE - sumChromosome[i]) / static_cast<double>(GENE));
+        fitnessValue[i] = accuracy * ((static_cast<double>(GENE) - sumChromosome[i]) / (GENE));
     }
 
     fitnessFile.close();
@@ -135,21 +250,7 @@ void evaluateChromosome(const char* path)
     }
 }
 
-void printChromosome()
-{
-    for (int c = 0; c < POP_SIZE; c++)
-    {
-        cout << "Chr " << c + 1 << "\t: ";
-
-        for (int g = 0; g < GENE; g++)
-        {
-            cout << chromosome[c][g] << ' ';
-        }
-        cout << '\n';
-    }
-}
-
-void parentSelection()
+void GA::parentSelection()
 {
     // tournament selection 2 player
 
@@ -202,7 +303,7 @@ void parentSelection()
     }
 }
 
-void crossover()
+void GA::crossover()
 {
     float randomValue;
     int crossoverPoint;
@@ -244,7 +345,7 @@ void crossover()
     }
 }
 
-void mutation()
+void GA::mutation()
 {
     float randomValue;
     int mutationBit;
@@ -285,7 +386,7 @@ void mutation()
     }
 }
 
-void survivalSelection()
+void GA::survivalSelection()
 {
     for (int c = 0; c < 2; c++)
     {
@@ -312,7 +413,7 @@ void survivalSelection()
     }
 }
 
-void copyChromosome()
+void GA::copyChromosome()
 {
     for (int c = 0; c < POP_SIZE; c++)
     {
@@ -323,7 +424,7 @@ void copyChromosome()
     }
 }
 
-void calculateAverageFitness()
+void GA::calculateAverageFitness()
 {
     double totalFitness = 0;
 
@@ -338,7 +439,7 @@ void calculateAverageFitness()
     ACP_File << averageFitness << endl;
 }
 
-void recordBestFitness()
+void GA::recordBestFitness()
 {
     for (int i = 0; i < POP_SIZE; i++)
     {
@@ -367,21 +468,9 @@ void recordBestFitness()
     bestChromosome_File << endl;
 }
 
-int main(int argc, char* argv[])
+void GA::initializePython(const char* path)
 {
-    const char* path = argv[0];
-
-   /* cout << "\nINITIALIZE POPULATION\n";
-    initialisePopulation();
-    printChromosome();
-
-    cout << "\nFITNESS EVALUATION\n";
-    evaluateChromosome(path);
-
-    cout << "\n\nPARENT SELECTION";
-    parentSelection();*/
-
-    wchar_t* program = Py_DecodeLocale(path, NULL);
+    program = Py_DecodeLocale(path, NULL);
 
     if (program == NULL)
     {
@@ -401,50 +490,11 @@ int main(int argc, char* argv[])
         "from sklearn.metrics import confusion_matrix\n"
         "from sklearn.metrics import roc_curve\n"
         "from sklearn.metrics import roc_auc_score\n"
-        "accuracyFile = open('accuracy_result.txt','w')\n"
-        "accuracyFile.close()\n"
     );
+}
 
-    cout << "\nINITIALIZE POPULATION\n";
-    initialisePopulation();
-
-    for (int j = 0; j < MAXIMUM_GENERATION; j++)
-    {
-        cout << "\n***************************GENERATION " << j + 1 << "****************************";
-        cout << "\n\nNEW POPULATION\n";
-        printChromosome();
-        //getchar();
-
-        counterSurvival = 0;
-
-        cout << "\nFITNESS EVALUATION";
-        evaluateChromosome(path);
-        calculateAverageFitness();
-        recordBestFitness();
-
-        for (int i = 0; i < POP_SIZE / 2; i++)
-        {
-            cout << "\n\nPARENT SELECTION";
-            parentSelection();
-
-            cout << "\n\nCROSSOVER";
-            crossover();
-
-            cout << "\n\nMUTATION";
-            mutation();
-
-            cout << "\n\nSURVIVAL SELECTION";
-            survivalSelection();
-        }
-
-        copyChromosome();
-    }
-
-    cout << "\n\nNEW POPULATION\n";
-    printChromosome();
-
-    ACP_File.close();
-
+void GA::closePython()
+{
     if (Py_FinalizeEx() < 0)
     {
         exit(120);
