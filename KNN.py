@@ -13,30 +13,38 @@ accuracyFile = open('accuracy_result.txt','w')
 accuracyFile.close()
 
 # Load the dataset
-df = pd.read_csv('wpbc.csv')
+df = pd.read_csv('dermatology.csv')
 #df.columns = ['ID number', 'Class', 'radius(mean)', 'texture(mean)', 'perimeter(mean)', 'area(mean)', 'smoothness(mean)', 'compactness(mean)', 'cancavity(mean)', 'concave points(mean)','symmetry(mean)','fractal dimension(mean)',    \
 #'radius(standard error)', 'texture(standard error)', 'perimeter(standard error)', 'area(standard error)', 'smoothness(standard error)', 'compactness(standard error)', 'cancavity(standard error)', 'concave points(standard error)','symmetry(standard error)','fractal dimension(standard error)', \
 #'radius(worst)', 'texture(worst)', 'perimeter(worst)', 'area(worst)', 'smoothness(worst)', 'compactness(worst)', 'cancavity(worst)', 'concave points(worst)','symmetry(worst)','fractal dimension(worst)']
 
-df.columns = ['ID number', 'Class', 'time','radius(mean)', 'texture(mean)', 'perimeter(mean)', 'area(mean)', 'smoothness(mean)', 'compactness(mean)', 'cancavity(mean)', 'concave points(mean)','symmetry(mean)','fractal dimension(mean)',    \
-'radius(standard error)', 'texture(standard error)', 'perimeter(standard error)', 'area(standard error)', 'smoothness(standard error)', 'compactness(standard error)', 'cancavity(standard error)', 'concave points(standard error)','symmetry(standard error)','fractal dimension(standard error)', \
-'radius(worst)', 'texture(worst)', 'perimeter(worst)', 'area(worst)', 'smoothness(worst)', 'compactness(worst)', 'cancavity(worst)', 'concave points(worst)','symmetry(worst)','fractal dimension(worst)','tumor size','lymph node status']
-df = df.drop(columns= 'ID number')
+#df.columns = ['ID number', 'Class', 'time','radius(mean)', 'texture(mean)', 'perimeter(mean)', 'area(mean)', 'smoothness(mean)', 'compactness(mean)', 'cancavity(mean)', 'concave points(mean)','symmetry(mean)','fractal dimension(mean)',    \
+#'radius(standard error)', 'texture(standard error)', 'perimeter(standard error)', 'area(standard error)', 'smoothness(standard error)', 'compactness(standard error)', 'cancavity(standard error)', 'concave points(standard error)','symmetry(standard error)','fractal dimension(standard error)', \
+#'radius(worst)', 'texture(worst)', 'perimeter(worst)', 'area(worst)', 'smoothness(worst)', 'compactness(worst)', 'cancavity(worst)', 'concave points(worst)','symmetry(worst)','fractal dimension(worst)','tumor size','lymph node status']
+
+df.columns = ['erythema', 'scaling', 'definite_borders','itching','koebner_phenomenon','polygonal_papules','follicular_papules','oral_mucosal_involvement','knee_and_elbow_involvement','scalp_involvement',    \
+               'family_history','melanin_incontinence','eosinophils_in_the_infiltrate','PNL_infiltrate','fibrosis_of_the_papillary_dermis','exocytosis','acanthosis','hyperkeratosis','parakeratosis','clubbing_of_the_rete_ridges',    \
+               'elongation_of_the_rete_ridges','thinning_of_the_suprapapillary_epidermis','spongiform_pustule','munro_microabcess','focal_hypergranulosis','disappearance_of_the_granular_layer','vacuolisation_and_damage_of_basal_layer','spongiosis','saw-tooth_appearance_of_rete','follicular_horn_plug',\
+               'perifollicular_parakeratosis','inflammatory_monoluclear_inflitrate','band-like_infiltrate','age','Class']
+
+#df = df.drop(columns= 'ID number')
 df = df.replace('?', np.NaN)
 df = df.dropna()
 
 # Let's create numpy arrays for features and target
 #X = df.drop('Class',axis=1).values
-features=['radius(mean)', 'texture(mean)','time']
-X = df[features].values
-y = df['Class'].values
+#features=['Atr1']
+#X = df[features].values
+#y = df['Class'].values
+X = df[df.columns[:-1]]
+y = df[df.columns[-1]]
 
 # Change the values of y into 0 and 1 only
-for c in range(len(y)): 
-    if y[c] == 'R':
-        y[c] = 0
-    elif y[c] == 'N':
-        y[c] = 1
+#for c in range(len(y)): 
+#    if y[c] == 'R':
+#        y[c] = 0
+#    elif y[c] == 'N':
+#        y[c] = 1
 
 y = y.astype('int')
 
@@ -66,7 +74,7 @@ print(train_accuracy)
 print(test_accuracy)
 
 # Setup a knn classifier with k neighbors
-knn = KNeighborsClassifier(n_neighbors=6)
+knn = KNeighborsClassifier(n_neighbors=4)
 
 # Fit the model
 knn.fit(X_train,y_train)

@@ -6,20 +6,25 @@
 #include <Python.h>
 using namespace std;
 
-const int GENE = 33;
+const int GENE = 34;
 const int POP_SIZE = 30;
 //const string ATTRIBUTE[GENE] = { "radius(mean)", "texture(mean)", "perimeter(mean)", "area(mean)", "smoothness(mean)", "compactness(mean)", "cancavity(mean)", "concave points(mean)","symmetry(mean)","fractal dimension(mean)",    
 //                                 "radius(standard error)", "texture(standard error)", "perimeter(standard error)", "area(standard error)", "smoothness(standard error)", "compactness(standard error)", "cancavity(standard error)", 
 //                                 "concave points(standard error)","symmetry(standard error)","fractal dimension(standard error)", "radius(worst)", "texture(worst)", "perimeter(worst)", "area(worst)", "smoothness(worst)", 
 //                                "compactness(worst)", "cancavity(worst)", "concave points(worst)","symmetry(worst)","fractal dimension(worst)" };
 
-const string ATTRIBUTE[GENE] = { "time", "radius(mean)", "texture(mean)", "perimeter(mean)", "area(mean)", "smoothness(mean)", "compactness(mean)", "cancavity(mean)", "concave points(mean)","symmetry(mean)","fractal dimension(mean)",
-                                 "radius(standard error)", "texture(standard error)", "perimeter(standard error)", "area(standard error)", "smoothness(standard error)", "compactness(standard error)", "cancavity(standard error)",
-                                 "concave points(standard error)","symmetry(standard error)","fractal dimension(standard error)", "radius(worst)", "texture(worst)", "perimeter(worst)", "area(worst)", "smoothness(worst)",
-                                 "compactness(worst)", "cancavity(worst)", "concave points(worst)","symmetry(worst)","fractal dimension(worst)", "tumor size", "lymph node status" };
+//const string ATTRIBUTE[GENE] = { "time", "radius(mean)", "texture(mean)", "perimeter(mean)", "area(mean)", "smoothness(mean)", "compactness(mean)", "cancavity(mean)", "concave points(mean)","symmetry(mean)","fractal dimension(mean)",
+//                                 "radius(standard error)", "texture(standard error)", "perimeter(standard error)", "area(standard error)", "smoothness(standard error)", "compactness(standard error)", "cancavity(standard error)",
+//                                 "concave points(standard error)","symmetry(standard error)","fractal dimension(standard error)", "radius(worst)", "texture(worst)", "perimeter(worst)", "area(worst)", "smoothness(worst)",
+//                                 "compactness(worst)", "cancavity(worst)", "concave points(worst)","symmetry(worst)","fractal dimension(worst)", "tumor size", "lymph node status" };
+
+const string ATTRIBUTE[GENE] = { "erythema", "scaling", "definite_borders","itching","koebner_phenomenon","polygonal_papules","follicular_papules","oral_mucosal_involvement","knee_and_elbow_involvement","scalp_involvement",
+                                 "family_history","melanin_incontinence","eosinophils_in_the_infiltrate","PNL_infiltrate","fibrosis_of_the_papillary_dermis","exocytosis","acanthosis","hyperkeratosis","parakeratosis","clubbing_of_the_rete_ridges",
+                                 "elongation_of_the_rete_ridges","thinning_of_the_suprapapillary_epidermis","spongiform_pustule","munro_microabcess","focal_hypergranulosis","disappearance_of_the_granular_layer","vacuolisation_and_damage_of_basal_layer","spongiosis","saw-tooth_appearance_of_rete","follicular_horn_plug",
+                                 "perifollicular_parakeratosis","inflammatory_monoluclear_inflitrate","band-like_infiltrate","age"};
 const double CROSSOVER_PROBABILITY = 0.9;
 const double MUTATION_PROBABILITY = 0.2;
-const int MAXIMUM_GENERATION = 30;
+const int MAXIMUM_GENERATION = 50;
 
 int chromosome[POP_SIZE][GENE];
 int sumChromosome[POP_SIZE];
@@ -37,13 +42,13 @@ ofstream bestChromosome_File("bestChromosome_File.txt");
 
 void initialisePopulation()
 {
-    //srand(time(0));
+    srand(time(0));
 
     for (int c = 0; c < POP_SIZE; c++)
     {
         int sum = 0;
 
-        do {
+       do {
             sum = 0;
 
             for (int g = 0; g < GENE; g++)
@@ -53,7 +58,7 @@ void initialisePopulation()
             }
 
             sumChromosome[c] = sum;
-        } while (sum <= 0);
+       } while (sum > 10);
     }
 }
 
@@ -106,7 +111,8 @@ void evaluateChromosome(const char* path)
     {
         PyRun_SimpleString(
             //"df = pd.read_csv('wdbc.csv')\n"
-            "df = pd.read_csv('wpbc.csv')\n"
+            //"df = pd.read_csv('wpbc.csv')\n"
+            "df = pd.read_csv('dermatology.csv')\n"
             //"df.columns = ['ID number', 'Class', 'radius(mean)', 'texture(mean)', 'perimeter(mean)', 'area(mean)', 'smoothness(mean)', 'compactness(mean)', 'cancavity(mean)', 'concave points(mean)', 'symmetry(mean)', 'fractal dimension(mean)', \\"
             //"\n'radius(standard error)', 'texture(standard error)', 'perimeter(standard error)', 'area(standard error)', 'smoothness(standard error)', 'compactness(standard error)', 'cancavity(standard error)', 'concave points(standard error)', 'symmetry(standard error)', 'fractal dimension(standard error)', \\"
             //"\n'radius(worst)', 'texture(worst)', 'perimeter(worst)', 'area(worst)', 'smoothness(worst)', 'compactness(worst)', 'cancavity(worst)', 'concave points(worst)', 'symmetry(worst)', 'fractal dimension(worst)']\n"
@@ -114,7 +120,13 @@ void evaluateChromosome(const char* path)
             "df.columns = ['ID number', 'Class', 'time', 'radius(mean)', 'texture(mean)', 'perimeter(mean)', 'area(mean)', 'smoothness(mean)', 'compactness(mean)', 'cancavity(mean)', 'concave points(mean)', 'symmetry(mean)', 'fractal dimension(mean)', \\"
             "\n'radius(standard error)', 'texture(standard error)', 'perimeter(standard error)', 'area(standard error)', 'smoothness(standard error)', 'compactness(standard error)', 'cancavity(standard error)', 'concave points(standard error)', 'symmetry(standard error)', 'fractal dimension(standard error)', \\"
             "\n'radius(worst)', 'texture(worst)', 'perimeter(worst)', 'area(worst)', 'smoothness(worst)', 'compactness(worst)', 'cancavity(worst)', 'concave points(worst)', 'symmetry(worst)', 'fractal dimension(worst)', 'tumor size', 'lymph node status']\n"
-            "df = df.drop(columns = 'ID number')\n"
+            
+            "df.columns = ['erythema', 'scaling', 'definite_borders', 'itching', 'koebner_phenomenon', 'polygonal_papules', 'follicular_papules', 'oral_mucosal_involvement', 'knee_and_elbow_involvement', 'scalp_involvement', \\"
+            "\n'family_history', 'melanin_incontinence', 'eosinophils_in_the_infiltrate', 'PNL_infiltrate', 'fibrosis_of_the_papillary_dermis', 'exocytosis', 'acanthosis', 'hyperkeratosis', 'parakeratosis', 'clubbing_of_the_rete_ridges', \\"
+            "\n'elongation_of_the_rete_ridges', 'thinning_of_the_suprapapillary_epidermis', 'spongiform_pustule', 'munro_microabcess', 'focal_hypergranulosis', 'disappearance_of_the_granular_layer', 'vacuolisation_and_damage_of_basal_layer', 'spongiosis', 'saw-tooth_appearance_of_rete', 'follicular_horn_plug',   \\"
+            "\n'perifollicular_parakeratosis', 'inflammatory_monoluclear_inflitrate', 'band-like_infiltrate', 'age','Class']\n"
+            
+            //"df = df.drop(columns = 'ID number')\n"
             "df = df.replace('?', np.NaN)\n"
             "df = df.dropna()\n"
         );
@@ -167,7 +179,8 @@ void evaluateChromosome(const char* path)
         double accuracy;
         fitnessFile >> accuracy;
 
-        fitnessValue[i] = (accuracy + (1 / (sumChromosome[i] + 0.01))) / 2.0;
+        //fitnessValue[i] = (accuracy + (1 / (sumChromosome[i] + 0.01))) / 2.0;
+        fitnessValue[i] = accuracy * ((GENE - sumChromosome[i]) / static_cast<double>(GENE));
     }
 
     fitnessFile.close();
