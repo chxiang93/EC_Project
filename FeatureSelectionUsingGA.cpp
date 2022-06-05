@@ -22,6 +22,7 @@ const double MUTATION_PROBABILITY = 0.2;
 const int MAXIMUM_GENERATION = 10;
 
 int chromosome[POP_SIZE][GENE];
+int sumChromosome[POP_SIZE];
 double fitnessValue[POP_SIZE];
 int parents[2][GENE];
 int children[2][GENE];
@@ -50,6 +51,8 @@ void initialisePopulation()
                 chromosome[c][g] = rand() % 2;
                 sum += chromosome[c][g];
             }
+
+            sumChromosome[c] = sum;
         //} while (sum > 2);
     }
 }
@@ -161,7 +164,11 @@ void evaluateChromosome(const char* path)
 
     for (int i = 0; fitnessFile; i++)
     {
-        fitnessFile >> fitnessValue[i];
+        double accuracy;
+
+        fitnessFile >> accuracy;
+
+        fitnessValue[i] = accuracy * ((static_cast<double>(GENE) - sumChromosome[i]) / (GENE));
     }
 
     fitnessFile.close();
